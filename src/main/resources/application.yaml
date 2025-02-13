@@ -11,7 +11,7 @@ spring:
     import : optional:configserver:http://localhost:9290
 
   application:
-    name: OrderService
+    name: ORDERSERVICE
 
   datasource :
     url : jdbc:mysql://${DB_HOST:localhost}:3306/orderdb
@@ -22,6 +22,6 @@ spring:
     database-platform : org.hibernate.dialect.MySQL8Dialect
     hibernate :
       ddl-auto : update
-    profiles :
-      active : git
+   # profiles :
+  #    active : git
 
