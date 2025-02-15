@@ -2,6 +2,7 @@ package com.codeforchangeskill.OrderService.service;
 
 
 import com.codeforchangeskill.OrderService.entity.Order;
+import com.codeforchangeskill.OrderService.external.client.ProductService;
 import com.codeforchangeskill.OrderService.model.OrderRequest;
 import com.codeforchangeskill.OrderService.repository.OrderRepository;
 import lombok.Builder;
@@ -19,6 +20,10 @@ public class OrderServiceImpl implements OrderService{
     @Autowired
     private OrderRepository orderRepository;
 
+
+    @Autowired
+    private ProductService productService;
+
     @Override
     public long placeOrder(OrderRequest orderRequest) {
 
@@ -29,6 +34,10 @@ public class OrderServiceImpl implements OrderService{
         // (And store the status in db)
 
         log.info("Placing Order Request ;{}",orderRequest);
+
+        productService.reduceQuantity(orderRequest.getProductId(),orderRequest.getQuantity());
+        log.info("Created order with status CREATED");
+
         /*Now convert this OR into OrderEntity
          */
         Order order=Order.builder()
@@ -40,7 +49,7 @@ public class OrderServiceImpl implements OrderService{
                 .build();
 
         order =orderRepository.save(order);
-        log.info("OOrder Placed Successfully with Order ID:{}",order.getId());
+        log.info("Order Placed Successfully with Order ID:{}",order.getId());
 
         return order.getId();
 

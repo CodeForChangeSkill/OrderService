@@ -1,5 +1,6 @@
 package com.codeforchangeskill.OrderService.controller;
 
+import com.codeforchangeskill.OrderService.external.client.ProductService;
 import com.codeforchangeskill.OrderService.model.OrderRequest;
 import com.codeforchangeskill.OrderService.service.OrderService;
 import lombok.extern.log4j.Log4j2;
@@ -19,6 +20,7 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
 
     @PostMapping("/placeOrder")
     public ResponseEntity<Long> placeOrder(@RequestBody OrderRequest orderRequest){
