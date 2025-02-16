@@ -1,4 +1,4 @@
-package com.codeforchangeskill.ProductService.Model;
+package com.codeforchangeskill.OrderService.external.response;
 
 
 import lombok.AllArgsConstructor;
