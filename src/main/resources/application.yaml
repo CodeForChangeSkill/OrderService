@@ -1,10 +1,18 @@
 server:
   port: 8184
 
+  management:
+    tracing:
+      enabled: true
+      sampling:
+        probability: 1.0 # Ensure all requests are traced
+
 logging:
   level:
     com.codeforchangeskill: DEBUG
     org.springframework.cloud: DEBUG
+    io.micrometer : DEBUG
+    brave : DEBUG
 
 spring:
   config :

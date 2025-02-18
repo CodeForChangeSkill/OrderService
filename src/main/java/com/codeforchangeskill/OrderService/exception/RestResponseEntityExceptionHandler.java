@@ -13,7 +13,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     @ExceptionHandler(CustomException.class)
   public ResponseEntity<ErrorResponse> handleCustomException(CustomException exception){
-        return new ResponseEntity<>(new ErrorResponse().builder()
+        new ErrorResponse();
+        return new ResponseEntity<>(ErrorResponse.builder()
                 .errorMessage(exception.getMessage())
                 .errorCode(exception.getErrorCode())
                 .build(), HttpStatus.valueOf(exception.getStatus()));
