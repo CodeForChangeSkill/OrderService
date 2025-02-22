@@ -2,7 +2,9 @@ package com.codeforchangeskill.OrderService.service;
 
 
 import com.codeforchangeskill.OrderService.entity.Order;
+import com.codeforchangeskill.OrderService.external.client.PaymentService;
 import com.codeforchangeskill.OrderService.external.client.ProductService;
+import com.codeforchangeskill.OrderService.external.request.PaymentRequest;
 import com.codeforchangeskill.OrderService.model.OrderRequest;
 import com.codeforchangeskill.OrderService.repository.OrderRepository;
 import lombok.Builder;
@@ -20,9 +22,11 @@ public class OrderServiceImpl implements OrderService{
     @Autowired
     private OrderRepository orderRepository;
 
-
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     @Override
     public long placeOrder(OrderRequest orderRequest) {
@@ -49,9 +53,32 @@ public class OrderServiceImpl implements OrderService{
                 .build();
 
         order =orderRepository.save(order);
-        log.info("Order Placed Successfully with Order ID:{}",order.getId());
 
-        return order.getId();
+        //PaymentService ->Complete Payment->Complete->Else
 
+        log.info("Calling PaymentService to complete the payment");
+        PaymentRequest paymentRequest
+                =PaymentRequest.builder()
+                .orderId(order.getId())
+                .paymentMode(orderRequest.getPaymentMode())
+                .amount(orderRequest.getTotalAmount())
+                .build();
+
+            String orderStatus=null;
+            try {
+                paymentService.doPayment(paymentRequest);
+                log.info("Payment done successfully.Changing the OrderStatus to placed");
+                        orderStatus="PLACED";
+            } catch (Exception e)
+            {
+            log.error("Error occurred in Payment.Changing OrderStatus to payment failed");
+                    orderStatus="PAYMENT_FAILED";
+            }
+            order.setOrderStatus(orderStatus);
+            orderRepository.save(order);
+
+            log.info("Order Placed Successfully with Order ID:{}", order.getId());
+            return order.getId();
+        }
     }
 }
