@@ -2,10 +2,12 @@ package com.codeforchangeskill.OrderService.service;
 
 
 import com.codeforchangeskill.OrderService.entity.Order;
+import com.codeforchangeskill.OrderService.exception.CustomException;
 import com.codeforchangeskill.OrderService.external.client.PaymentService;
 import com.codeforchangeskill.OrderService.external.client.ProductService;
 import com.codeforchangeskill.OrderService.external.request.PaymentRequest;
 import com.codeforchangeskill.OrderService.model.OrderRequest;
+import com.codeforchangeskill.OrderService.model.OrderResponse;
 import com.codeforchangeskill.OrderService.repository.OrderRepository;
 import lombok.Builder;
 import lombok.extern.log4j.Log4j2;
@@ -27,6 +29,7 @@ public class OrderServiceImpl implements OrderService{
 
     @Autowired
     private PaymentService paymentService;
+
 
     @Override
     public long placeOrder(OrderRequest orderRequest) {
@@ -80,5 +83,28 @@ public class OrderServiceImpl implements OrderService{
             log.info("Order Placed Successfully with Order ID:{}", order.getId());
             return order.getId();
         }
+
+    @Override
+    public OrderResponse getOrderDetails(long orderId) {
+        log.info("Get order details for OrderId :{}",orderId);
+
+        Order order=
+                orderRepository.findById(orderId)
+                .orElseThrow(()->new CustomException("Order not Found",
+                        "ORDER_NOT_FOUND",
+                        404));
+
+        OrderResponse orderResponse
+                = OrderResponse.builder()
+                .orderId(order.getId())
+                .orderStatus(order.getOrderStatus())
+                .orderDate(order.getOrderDate())
+                .amount(order.getAmount())
+                .build();
+
+        return orderResponse;
+
+
+
     }
 }
