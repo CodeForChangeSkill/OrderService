@@ -6,6 +6,7 @@ import com.codeforchangeskill.OrderService.exception.CustomException;
 import com.codeforchangeskill.OrderService.external.client.PaymentService;
 import com.codeforchangeskill.OrderService.external.client.ProductService;
 import com.codeforchangeskill.OrderService.external.request.PaymentRequest;
+import com.codeforchangeskill.OrderService.external.response.ProductResponse;
 import com.codeforchangeskill.OrderService.model.OrderRequest;
 import com.codeforchangeskill.OrderService.model.OrderResponse;
 import com.codeforchangeskill.OrderService.repository.OrderRepository;
@@ -14,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 
@@ -30,6 +32,9 @@ public class OrderServiceImpl implements OrderService{
     @Autowired
     private PaymentService paymentService;
 
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
     public long placeOrder(OrderRequest orderRequest) {
@@ -94,17 +99,53 @@ public class OrderServiceImpl implements OrderService{
                         "ORDER_NOT_FOUND",
                         404));
 
+    //ProductDetails using RestTemplate will be fetched here
+
+        log.info("Invoking Product service to fetch product for id:{}",order.getProductId());
+
+        ProductResponse productResponse
+                =restTemplate.getForObject(
+                        "http://PRODUCT-SERVICE/product/" +order.getProductId(),
+                ProductResponse.class);
+
+        OrderResponse.ProductDetails productDetails
+                = OrderResponse.ProductDetails.builder()
+                .productName(productResponse.getProductName())
+                .productId(productResponse.getProductId())
+                .price(productResponse.getPrice())
+                .quantity(productResponse.getQuantity())
+                .build();
+    /// the below method can also be used and in this case we cont need to copy
+        ///external/response/ProductResponse
+
+       /*
+       OrderResponse.ProductDetails productDetailsFetch
+                =restTemplate.getForObject(
+                "http://PRODUCT-SERVICE/product/" +order.getProductId(),
+                OrderResponse.ProductDetails.class);
+
+        OrderResponse.ProductDetails productDetails
+                = OrderResponse.ProductDetails.builder()
+                .productName(productDetailsFetch.getProductName())
+                .productId(productDetailsFetch.getProductId())
+                .price(productDetailsFetch.getPrice())
+                .quantity(productDetailsFetch.getQuantity())
+                .build(); */
+
         OrderResponse orderResponse
                 = OrderResponse.builder()
                 .orderId(order.getId())
                 .orderStatus(order.getOrderStatus())
                 .orderDate(order.getOrderDate())
                 .amount(order.getAmount())
+                .productDetails(productDetails)
                 .build();
 
         return orderResponse;
-
-
-
     }
+
+
+
+
 }
+
