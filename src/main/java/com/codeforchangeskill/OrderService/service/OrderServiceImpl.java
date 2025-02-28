@@ -6,6 +6,7 @@ import com.codeforchangeskill.OrderService.exception.CustomException;
 import com.codeforchangeskill.OrderService.external.client.PaymentService;
 import com.codeforchangeskill.OrderService.external.client.ProductService;
 import com.codeforchangeskill.OrderService.external.request.PaymentRequest;
+import com.codeforchangeskill.OrderService.external.response.PaymentResponse;
 import com.codeforchangeskill.OrderService.external.response.ProductResponse;
 import com.codeforchangeskill.OrderService.model.OrderRequest;
 import com.codeforchangeskill.OrderService.model.OrderResponse;
@@ -115,22 +116,37 @@ public class OrderServiceImpl implements OrderService{
                 .price(productResponse.getPrice())
                 .quantity(productResponse.getQuantity())
                 .build();
-    /// the below method can also be used and in this case we cont need to copy
-        ///external/response/ProductResponse
+                                                        /// the below method can also be used and in this case we cont need to copy
+                                                                            ///external/response/ProductResponse
+                                                                                    /*OrderResponse.ProductDetails productDetailsFetch
+                                                                                                    =restTemplate.getForObject(
+                                                                                        "http://PRODUCT-SERVICE/product/" +order.getProductId(),
+                                                                                                    OrderResponse.ProductDetails.class);
 
-       /*
-       OrderResponse.ProductDetails productDetailsFetch
+                                                                             OrderResponse.ProductDetails productDetails
+                                                                                                 = OrderResponse.ProductDetails.builder()
+                                                                        .productName(productDetailsFetch.getProductName())
+                                                                 .productId(productDetailsFetch.getProductId())
+                                                                    .price(productDetailsFetch.getPrice())
+                                                            .quantity(productDetailsFetch.getQuantity())
+                                                                                .build(); */
+
+        log.info("Getting Payment details for the payment service");
+
+        OrderResponse.PaymentDetails paymentResponse
                 =restTemplate.getForObject(
-                "http://PRODUCT-SERVICE/product/" +order.getProductId(),
-                OrderResponse.ProductDetails.class);
+                "http://PAYMENT-SERVICE/payment/order/" +order.getId(),
+                OrderResponse.PaymentDetails.class
+        );
 
-        OrderResponse.ProductDetails productDetails
-                = OrderResponse.ProductDetails.builder()
-                .productName(productDetailsFetch.getProductName())
-                .productId(productDetailsFetch.getProductId())
-                .price(productDetailsFetch.getPrice())
-                .quantity(productDetailsFetch.getQuantity())
-                .build(); */
+        OrderResponse.PaymentDetails paymentDetails
+                    =OrderResponse.PaymentDetails.builder()
+                    .paymentId(paymentResponse.getPaymentId())
+                    .paymentStatus(paymentResponse.getPaymentStatus())
+                    .paymentDate(paymentResponse.getPaymentDate())
+                    .paymentMode(paymentResponse.getPaymentMode())
+                    .build();
+
 
         OrderResponse orderResponse
                 = OrderResponse.builder()
@@ -139,6 +155,7 @@ public class OrderServiceImpl implements OrderService{
                 .orderDate(order.getOrderDate())
                 .amount(order.getAmount())
                 .productDetails(productDetails)
+                .paymentDetails(paymentDetails)
                 .build();
 
         return orderResponse;
